@@ -38,6 +38,18 @@ module tubes() {
   }
 }
 
+module dice_tubes() {
+  for (p = tubesP) {
+    color(p == [0,0,t] ? "blue" : "white", 0.7)
+    translate(p)
+    difference() {
+      hexagon_prism(tubeH, 27/2);
+      translate([0,0,t])
+      hexagon_prism(tubeH + t, 24/2);
+    }
+  }
+}
+
 module tubeHolderSolid() {
   difference() {
     union() {
@@ -75,7 +87,7 @@ module tubeHolderSolid() {
 
 module tread(isInternal = false) {
     difference(){ 
-      color("blue")
+      color("darkslategrey")
       metric_thread(
           diameter = outerR * 2 + t + 0.2,
           pitch = t,
@@ -90,7 +102,7 @@ module tread(isInternal = false) {
 module caseCylinder() {
   difference() {
     union () {
-      color("black")
+      color("darkslategrey")
       cylinder(r = outerR, h = tubeH + t);
       translate([0, 0, 0.02])
       tread();
@@ -144,10 +156,10 @@ module cap_logo() {
 }
 
 tubeHolder();
-//caseCylinder();
+caseCylinder();
 //cap();
 //translate([100, 100, 0])
 //logo();
 //translate([100, 0, 0])
 //cap_logo();
-
+dice_tubes();
