@@ -135,31 +135,35 @@ module cap() {
 }
 
 module logo() {
-  scale([3.7, 3.7, 1])
+  scale([3.7, 3.7, t + 0.1])
   starfinder_logo();
+  translate([0,0,-0.01])
+  cylinder(r = topR, h = 0.25);
 }
 
 module cap_logo() {
   difference() {
-    translate([0,0,0.99])
+    translate([0,0,t])
     rotate([180, 0, 0])
     translate([0, 0, t + 0.02])
     cap();
     color("grey")
     minkowski() {
-      scale([3.7, 3.7, 1])
+      scale([3.7, 3.7, t])
       starfinder_logo();
       translate([-0.25, -0.25, 0])
       cube([0.5,0.5, 0.1]);
     }
+    translate([0,0,-0.01])
+    cylinder(r = topR, h = 0.25);
   }
 }
 
 tubeHolder();
 caseCylinder();
 //cap();
-//translate([100, 100, 0])
-//logo();
 //translate([100, 0, 0])
-//cap_logo();
+//logo();
+translate([100, 0, 0])
+cap_logo();
 dice_tubes();
