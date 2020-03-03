@@ -123,11 +123,40 @@ module tubeHolder() {
   }
 }
 
+module bezel_disc(r, h, t) {
+  hull() {
+    cylinder(r = r, h = h);
+    translate([0,0,t])
+    cylinder(r = r + t, h = h - 2 * t);  
+  }
+}
+
+// A centered box with bezels.
+module bezel_box(size, t) {
+  translate(-[size[0], size[1], -2*t]/2)
+  hull() {
+    translate([-t, 0, 0])
+    cube(size + [2*t,0,0]);
+    translate([0, -t, 0])
+    cube(size + [0,2*t,0]);
+    translate([0, 0, -t])
+    cube(size + [0,0,2*t]);
+  }
+}
+
 module cap() {
   color("grey")
   difference() {
-    translate([0, 0, -t - 0.01])
-    cylinder(r = outerR + 2*t, h = topH + t);
+    translate([0, 0, -t - 0.01]) {
+      bezel_disc(r = outerR + t, h = topH + t, t = t);
+      intersection() {
+        bezel_disc(outerR + 2*t, topH + t, t);
+        for (angle = [0 : 60 : 359]) {
+          rotate([0, 0, angle])
+          bezel_box([8*t, outerR * 2 + 10*t, topH - t], t);
+        }
+      }
+    }
     tread(isInternal = true);
     translate([0,0,-0.02])
     cylinder(r = topR + 0.61, h = topH + 0.04);
@@ -162,8 +191,8 @@ module cap_logo() {
 tubeHolder();
 caseCylinder();
 //cap();
-//translate([100, 0, 0])
+//translate([110, 0, 0])
 //logo();
-translate([100, 0, 0])
+translate([110, 0, 0])
 cap_logo();
 dice_tubes();
