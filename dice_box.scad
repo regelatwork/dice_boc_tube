@@ -99,18 +99,50 @@ module tread(isInternal = false) {
     }
 }
 
+module cylinder_hex_join() {
+  hull() {
+    intersection() {
+      rotate([0, 0, 30])    
+      hexagon_prism(3*t, tubeD*1.7);
+      cylinder(r = outerR, h = topH + t);
+    }
+    cylinder(r = outerR, h = t);
+  }
+}
+
+module caseShape() {
+  centerHexH = tubeH - 2*topH - t; 
+  cylinder(r = outerR, h = topH + t);
+  translate([0, 0, tubeH - topH])
+  cylinder(r = outerR, h = topH + t);
+  intersection() {
+    cylinder(r = outerR, h = tubeH + t);
+    rotate([0, 0, 30])
+    translate([0,0,(tubeH + t - centerHexH)/2])
+    hexagon_prism(centerHexH, tubeD*1.7);
+  }
+  translate([0,0,topH])
+  cylinder_hex_join();
+  translate([0,0,tubeH - topH + t])
+  mirror([0,0,1])
+  cylinder_hex_join();  
+}
+
 module caseCylinder() {
   difference() {
+    color("darkslategrey")
     union () {
-      color("darkslategrey")
-      cylinder(r = outerR, h = tubeH + t);
+      difference() {
+        caseShape();
+        translate([0,0,-0.01])
+        scale(((outerR - t)/outerR) * [1,1,0] + [0,0,1.01])
+        caseShape();
+      }
       translate([0, 0, 0.02])
       tread();
       translate([0, 0, tubeH + t - topH - 0.02])
       tread();
     }
-    translate([0,0,-0.01])
-    cylinder(r = topR + 0.5, h = tubeH + t + 0.02);
     translate([-tubeD/4 - 0.5, -topR - 2*t, tubeH + t - topH - 0.5])
     cube([tubeD/2 + 1, (topR + 2*t) * 2, topH + 1]);
   }
@@ -190,9 +222,9 @@ module cap_logo() {
 
 tubeHolder();
 caseCylinder();
-//cap();
-//translate([110, 0, 0])
-//logo();
-translate([110, 0, 0])
-cap_logo();
 dice_tubes();
+cap();
+translate([0,0,tubeH + t]) {
+  logo();
+  cap_logo();
+}
