@@ -110,6 +110,42 @@ module cylinder_hex_join() {
   }
 }
 
+module grill(w, h) {
+  stepY = w / 2;
+  countY = floor(w/stepY) + 1;
+  stepZ = sqrt(3) / 3 * stepY;
+  countZ = floor(h/stepZ) + 1;
+  hh = countZ * stepZ;
+  
+  rnd_matrix = [ for (i = [0 : countZ - 1]) rands(0, 1, countY * 2)];
+  color("darkslategrey")
+  for(z = [0 : stepZ : h]) {
+    for(y = [0 : stepY : w]) {
+      zI = floor(z / stepZ);
+      yI = floor(y / stepY);
+      if (rnd_matrix[zI][yI * 2] < ((zI + 0) / countZ)) {
+        translate([-2 * t, y - w / 2, z - hh / 2])
+        rotate([0, 90, 0])
+        rotate([0, 0, 30])
+        hexagon_prism(4 * t, t);
+      }
+    }
+  }
+  color("darkslategrey")
+  for(z = [0 : stepZ : h - stepZ]) {
+    for(y = [0 : stepY : w - stepY]) {
+      zI = floor(z / stepZ);
+      yI = floor(y / stepY);
+      if (rnd_matrix[zI][yI * 2 + 1] < ((zI + 0) / countZ)) {
+        translate([-2 * t, y - w / 2 + stepY/2, z - hh / 2 + stepZ / 2])
+        rotate([0, 90, 0])
+        rotate([0, 0, 30])
+        hexagon_prism(4 * t, t);
+      }
+    }
+  }
+}
+
 module caseShape() {
   centerHexH = tubeH - 2*topH - t; 
   cylinder(r = outerR, h = topH + t);
@@ -145,6 +181,11 @@ module caseCylinder() {
     }
     translate([-tubeD/4 - 0.5, -topR - 2*t, tubeH + t - topH - 0.5])
     cube([tubeD/2 + 1, (topR + 2*t) * 2, topH + 1]);
+    for (angle = [0 : 60 : 359]) {
+      rotate([0, 0, angle])
+      translate([outerR * sqrt(3) / 2, 0, (tubeH + t) / 2])
+      grill(outerR/1.6, tubeH - topH * 2 - 8*t);
+    }
   }
 }
 
@@ -220,11 +261,11 @@ module cap_logo() {
   }
 }
 
-tubeHolder();
+//tubeHolder();
 caseCylinder();
-dice_tubes();
-cap();
-translate([0,0,tubeH + t]) {
-  logo();
-  cap_logo();
-}
+//dice_tubes();
+//cap();
+//translate([0,0,tubeH + t]) {
+//  logo();
+//  cap_logo();
+//}
