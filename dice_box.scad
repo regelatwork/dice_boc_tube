@@ -1,7 +1,7 @@
 use<MCAD/regular_shapes.scad>
 use<MCAD/fasteners/threads.scad> 
 
-$fn = 64;
+$fn = 128;
 t = 3;
 tubeT = 1.25;
 tubeD = 26 + 2 * tubeT;
@@ -240,7 +240,7 @@ module logo() {
   scale([3.7, 3.7, t + 0.1])
   starfinder_logo();
   translate([0,0,-0.01])
-  cylinder(r = topR, h = 0.25);
+  cylinder(r = topR + t - 0.25, h = 0.25);
 }
 
 module cap_logo() {
@@ -256,8 +256,9 @@ module cap_logo() {
       translate([-0.25, -0.25, 0])
       cube([0.5,0.5, 0.1]);
     }
-    translate([0,0,-0.01])
-    cylinder(r = topR, h = 0.25);
+    color("red")
+    translate([0,0, -0.025])
+    cylinder(r = topR + t, h = 0.275);
   }
 }
 
