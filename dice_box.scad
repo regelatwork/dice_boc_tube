@@ -21,10 +21,6 @@ module hexagon_vase(h, w, t) {
   hexagon_tube(t, w/2 + t, w/2 + t/2);
 }
 
-
-//translate([30,0,0])
-//hexagon_vase(125, 26, 1);
-
 tubesP = [
   [0, 0, t],
   for (angle = [0 : 60 : 300])
@@ -89,7 +85,7 @@ module tread(isInternal = false) {
     difference(){ 
       color("darkslategrey")
       metric_thread(
-          diameter = outerR * 2 + t + 0.2,
+          diameter = outerR * 2 + t + 0.2 + (isInternal ? 0.5 : 0),
           pitch = t,
           length = topH,
           internal = isInternal,
@@ -237,7 +233,7 @@ module cap() {
 }
 
 module logo() {
-  scale([3.7, 3.7, t + 0.1])
+  scale([3.7, 3.7, t + 0.5])
   starfinder_logo();
   translate([0,0,-0.01])
   cylinder(r = topR + t - 0.25, h = 0.25);
@@ -262,11 +258,17 @@ module cap_logo() {
   }
 }
 
+//difference() {
+//union() {
 //tubeHolder();
-caseCylinder();
+//caseCylinder();
 //dice_tubes();
 //cap();
 //translate([0,0,tubeH + t]) {
 //  logo();
 //  cap_logo();
+//}
+//}
+//translate([-100,0,0])
+//cube([200,200,200]);
 //}
