@@ -345,32 +345,42 @@ module diceCap() {
   topStubs();
 }
 
+botomCaseH = topH * 2 + t * 8 + 25;
+diceRampP = [0, -0.5, botomCaseH - topH - 4*t];
+doorW = 38;
+doorH = 25;
+doorHDown = 9;
+module doorNegative() {
+  translate([-doorW/2, -topR + 0.75, topH + 3*t - doorHDown])
+  cube([doorW, t + 2*0.1, doorH + doorHDown]);
+}
+
+module door() {
+  slop = 0.5;
+  translate([-doorW/2 + slop, -topR + 0.75, topH + 3*t - doorHDown + slop])
+  cube([doorW - 2*slop, t + 2*0.1, doorH + doorHDown - 2*slop]);
+}
 
 difference() {
   union() {
-botomCaseH = topH * 2 + t * 8 + 25;
-diceRampP = [0, -0.5, botomCaseH - topH - 4*t];
+
 difference() {
   union() {
-    rotateAt([180, 0, 0], [0, 0, botomCaseH/2 + t/2])
-    caseCylinder(botomCaseH, false);
+    difference() {
+      caseCylinder(botomCaseH, false);
+      
+      rotate([0,0,30])
+      doorNegative();
+    }
     
     rotate([0,0,30])
     for (i = [0, 1]) mirror([i, 0, 0]) {
       translate([-topR - t/2, -t, botomCaseH - topH -5*t])
-      cube([t, 2*t, t]);
-    }
-      
-    rotate([0,0,30])
-    for (i = [0, 1]) mirror([i, 0, 0]) {
-      rotate([0, 0, 30])
-      translate([-topR + 1*t, -t, botomCaseH - topH -3*t])
-      cube([1.6*t, 2*t, t]);      
+      cube([2*t, 2*t, t]);
     }
   }
 
   color("darkslategrey")
-  
   rotate([0, 0, 30])
   translate(diceRampP)
   diceRampHinge(true);
@@ -380,20 +390,25 @@ rotate([0, 0, 30])
 translate(diceRampP)
 diceRampHinge(false);
 
-color("darkslategrey")
-rotate([0, 0, 30])
-translate([-t/2, -tubeD*1.4, botomCaseH - topH - 3*t])
-cube([t, tubeD*1.4*2, t]);
-
 rotate([0, 0, 30])
 translate(diceRampP)
-rotateAt([19, 0, 0], [0, 38, t/2])
+rotateAt([17, 0, 0], [0, 38, t/2])
 //diceRamp();
-#diceRampMock(27);
+diceRampMock(35);
 }
 translate([39, -150, -5])
 cube([300,300,300]);
 }
+
+// door
+rotate([0,0,30])
+rotateAt([95, 0, 0], [0, -topR + 0.75*t, topH + 4*t])
+door();
+    
+rotate([0,0,30])
+translate([0, -90, 0])
+diceTray(topH + 4*t);
+
 /*
 diceCap();
 */

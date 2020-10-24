@@ -7,12 +7,12 @@ e = 0.1;
 $fn = 50;
 barL = thick * 1.5;
 
-module bend(angle = 60, rr = bendR) {
+module bend(angle = 60, rr = bendR, h = thick) {
   translate([0, rr + thick, 0])
   rotate([0, 0, -90])
   rotate_extrude(angle = angle, convexity = 10)
   translate([rr, 0])
-  square([thick, thick]);
+  square([thick, h]);
 }
 
 module slantedBend(angle = 60, rr = bendR) {
@@ -26,20 +26,20 @@ module slantedBend(angle = 60, rr = bendR) {
   }
 }
 
-module aSide() {
+module aSide(h = thick) {
   blip = 1/sin(60) * bendR;
   translate([-(sideL - blip)/2, 0, 0]) {
-    cube([sideL - blip, thick, thick]);
+    cube([sideL - blip, thick, h]);
     translate([sideL - blip, 0 ,0])
-    bend();
+    bend(60, bendR, h);
   }
 }
 
-module ring() {
+module ring(h = thick) {
   for(a = [0 : 60 : 359]) {
     rotate([0, 0, a])
     translate([0, -thick-sideL * sqrt(3)/2, 0])
-    aSide();
+    aSide(h);
   }
 }
 
@@ -284,4 +284,9 @@ module diceRampMock(angle = 0) {
 
   translate([-sideL/2 + 0.5*thick, -sideL + thick, -e])
   cube([sideL - 1*thick, 2*sideL - 2*thick, thick]);
+}
+
+module diceTray(h = 25) {
+  ring(h);
+  hull() ring();
 }
