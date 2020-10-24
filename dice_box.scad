@@ -1,5 +1,4 @@
-// A foldable dice tower that can be printed as a single piece in
-// place. Some folding required.
+// An overdesigned dice box.
 //
 // Copyright (c) 2020 Rodrigo Chandia (rodrigo.chandia@gmail.com)
 // All rights reserved.
@@ -24,8 +23,9 @@
 
 use<MCAD/regular_shapes.scad>
 use<MCAD/fasteners/threads.scad> 
+use<hinge.scad>
 
-$fn = 128;
+//$fn = 128;
 t = 3;
 tubeT = 1.25;
 tubeD = 26 + 2 * tubeT;
@@ -37,7 +37,12 @@ topR = tubeD * 1.5;
 outerR = topR + t + 0.5;
 
 module starfinder_logo() {
-  include<starfinder_logo.scad>;
+  //include<starfinder_logo.scad>;
+  difference() {
+    cylinder(r= 10, h=1, $fn=8);
+    translate([-5,-5,-0.05])
+    cube([10,10,1.1]);
+  }
 }
 
 module hexagon_vase(h, w, t) {
@@ -70,11 +75,20 @@ module dice_tubes() {
   }
 }
 
+module topHolderCap() {
+  translate([0,0,tubeH - topH + t - 0.01])
+  cylinder(r = topR, h = topH);
+  intersection() {
+    translate([-tubeD/4, -topR - t, tubeH - topH + t])
+    cube([tubeD/2, (topR + t) * 2, topH]);
+    cylinder(r = topR + t, h = tubeH + t - 0.01);
+  }
+}
+
 module tubeHolderSolid() {
   difference() {
     union() {
-      translate([0,0,tubeH - topH + t - 0.01])
-      cylinder(r = topR, h = topH);
+      topHolderCap();
       hexagon_prism(tubeH, tubeD);
       translate([0, 0, bottomH])
       linear_extrude(height = bottomH, scale = 1/1.1)
@@ -97,11 +111,6 @@ module tubeHolderSolid() {
     mirror([0, 0, 1])
     linear_extrude(height = t + 0.2, scale = 0.8)
       hexagon(tubeD/2);
-  }
-  intersection() {
-    translate([-tubeD/4, -topR - t, tubeH - topH + t])
-    cube([tubeD/2, (topR + t) * 2, topH]);
-    cylinder(r = topR + t, h = tubeH + t - 0.01);
   }
 }
 
@@ -166,45 +175,47 @@ module grill(w, h) {
   }
 }
 
-module caseShape() {
-  centerHexH = tubeH - 2*topH - t; 
+module caseShape(height) {
+  centerHexH = height - 2*topH - t; 
   cylinder(r = outerR, h = topH + t);
-  translate([0, 0, tubeH - topH])
+  translate([0, 0, height - topH])
   cylinder(r = outerR, h = topH + t);
   intersection() {
-    cylinder(r = outerR, h = tubeH + t);
+    cylinder(r = outerR, h = height + t);
     rotate([0, 0, 30])
-    translate([0,0,(tubeH + t - centerHexH)/2])
+    translate([0,0,(height + t - centerHexH)/2])
     hexagon_prism(centerHexH, tubeD*1.7);
   }
   translate([0,0,topH])
   cylinder_hex_join();
-  translate([0,0,tubeH - topH + t])
+  translate([0,0,height - topH + t])
   mirror([0,0,1])
   cylinder_hex_join();  
 }
 
-module caseCylinder() {
+module caseCylinder(height = tubeH, hasGrill = true) {
   difference() {
     color("darkslategrey")
     union () {
       difference() {
-        caseShape();
+        caseShape(height);
         translate([0,0,-0.01])
         scale(((outerR - t)/outerR) * [1,1,0] + [0,0,1.01])
-        caseShape();
+        caseShape(height);
       }
       translate([0, 0, 0.02])
       tread();
-      translate([0, 0, tubeH + t - topH - 0.02])
+      translate([0, 0, height + t - topH - 0.02])
       tread();
     }
-    translate([-tubeD/4 - 0.5, -topR - 2*t, tubeH + t - topH - 0.5])
+    translate([-tubeD/4 - 0.5, -topR - 2*t, height + t - topH - 0.5])
     cube([tubeD/2 + 1, (topR + 2*t) * 2, topH + 1]);
-    for (angle = [0 : 60 : 359]) {
-      rotate([0, 0, angle])
-      translate([outerR * sqrt(3) / 2, 0, (tubeH + t) / 2])
-      grill(outerR/1.6, tubeH - topH * 2 - 8*t);
+    if (hasGrill) {
+      for (angle = [0 : 60 : 359]) {
+        rotate([0, 0, angle])
+        translate([outerR * sqrt(3) / 2, 0, (height + t) / 2])
+        grill(outerR/1.6, height - topH * 2 - 8*t);
+      }
     }
   }
 }
@@ -266,6 +277,7 @@ module logo() {
 module cap_logo() {
   difference() {
     translate([0,0,t])
+    rotate([0, 0, 180])
     rotate([180, 0, 0])
     translate([0, 0, t + 0.02])
     cap();
@@ -282,17 +294,123 @@ module cap_logo() {
   }
 }
 
-//difference() {
-//union() {
-//tubeHolder();
-//caseCylinder();
-//dice_tubes();
-//cap();
-//translate([0,0,tubeH + t]) {
-//  logo();
-//  cap_logo();
-//}
-//}
-//translate([-100,0,0])
-//cube([200,200,200]);
-//}
+diceHole = 30;
+
+module cubeSurface() {
+  difference() {
+    for (angleOffset = [0 : 25 : 359]) {
+      for (angle = [0 : 17 : 359]) {
+        rotationAngle = rands(0, 20, 3, angle * 360 + angleOffset);
+        rndAngleSize = 10;
+        initialAngle = [-35,-15,40];
+        posAngle = rands(0, rndAngleSize, 1, angle * 360 + angleOffset + 1000)[0];
+        rotate([0, 0, angle + angleOffset + posAngle - rndAngleSize/2])
+        translate([angle / 15 + 15, 0, angle / 45 + 0.5])
+        rotate(rotationAngle + initialAngle)
+        translate(-0.5*[5,5,5])
+        cube([5,5,5]);
+      }
+    }
+    translate([-50, -50, -100 + 0.01])
+    cube([100,100,100]);
+    translate([-50, -50, topH - 0.02])
+    cube([100,100,100]);
+        cylinder(r = diceHole/2, h = topH + 0.03);
+  }
+}
+
+use<dice_ladder.scad>;
+
+module diceCap() {
+  topHPos = tubeH - topH + t;
+  difference() {
+    union() {
+      difference() {
+        topHolderCap();
+        translate([0, 0, topHPos - 0.02]) {
+          cylinder(r = diceHole/2, h = topH + 0.03);
+          translate([0, 0, t])
+          cylinder(r1 = diceHole/2, r2 = topR - t, h = topH - t + 0.03);
+        }
+      }
+      translate([0, 0, topHPos])
+      cubeSurface();
+    }
+    translate([0, 0, topHPos - 0.02])
+    rotate([0,0,180])
+    connectorCubes();
+  }
+  translate([0, 0, topHPos])
+  rotate([0,0,90])
+  topStubs();
+}
+
+
+difference() {
+  union() {
+botomCaseH = topH * 2 + t * 8 + 25;
+diceRampP = [0, -0.5, botomCaseH - topH - 4*t];
+difference() {
+  union() {
+    rotateAt([180, 0, 0], [0, 0, botomCaseH/2 + t/2])
+    caseCylinder(botomCaseH, false);
+    
+    rotate([0,0,30])
+    for (i = [0, 1]) mirror([i, 0, 0]) {
+      translate([-topR - t/2, -t, botomCaseH - topH -5*t])
+      cube([t, 2*t, t]);
+    }
+      
+    rotate([0,0,30])
+    for (i = [0, 1]) mirror([i, 0, 0]) {
+      rotate([0, 0, 30])
+      translate([-topR + 1*t, -t, botomCaseH - topH -3*t])
+      cube([1.6*t, 2*t, t]);      
+    }
+  }
+
+  color("darkslategrey")
+  
+  rotate([0, 0, 30])
+  translate(diceRampP)
+  diceRampHinge(true);
+}
+color("darkslategrey")
+rotate([0, 0, 30])
+translate(diceRampP)
+diceRampHinge(false);
+
+color("darkslategrey")
+rotate([0, 0, 30])
+translate([-t/2, -tubeD*1.4, botomCaseH - topH - 3*t])
+cube([t, tubeD*1.4*2, t]);
+
+rotate([0, 0, 30])
+translate(diceRampP)
+rotateAt([19, 0, 0], [0, 38, t/2])
+//diceRamp();
+#diceRampMock(27);
+}
+translate([39, -150, -5])
+cube([300,300,300]);
+}
+/*
+diceCap();
+*/
+
+/*
+tubeHolder();
+dice_tubes();
+difference() {
+union() {
+caseCylinder();
+cap();
+translate([0,0,tubeH + t]) {
+  logo();
+  cap_logo();
+}
+}
+translate([-00,-200,0])
+cube([200,200,200]);
+}
+*/
